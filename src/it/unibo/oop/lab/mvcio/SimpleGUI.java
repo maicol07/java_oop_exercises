@@ -1,9 +1,19 @@
 package it.unibo.oop.lab.mvcio;
 
+import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 
+import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JTextArea;
 
 /**
  * A very simple program using a graphical interface.
@@ -57,6 +67,37 @@ public final class SimpleGUI {
          * on screen. Results may vary, but it is generally the best choice.
          */
         frame.setLocationByPlatform(true);
+
+        final var panel = new JPanel();
+        panel.setLayout(new BorderLayout());
+        frame.setContentPane(panel);
+
+        final var textarea = new JTextArea(15, 30);
+        panel.add(textarea, BorderLayout.CENTER);
+
+        final var save = new JButton("Save");
+        panel.add(save, BorderLayout.SOUTH);
+
+        frame.setVisible(true);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.pack();
+
+        save.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(final ActionEvent e) {
+                try {
+                    new Controller().setContents(textarea.getText());
+                } catch (IOException e1) {
+                    JOptionPane.showMessageDialog(frame, e1.getMessage());
+                    e1.printStackTrace();
+                }
+            }
+        });
+    }
+
+    public static void main(final String...args) {
+        new SimpleGUI();
     }
 
 }

@@ -24,7 +24,7 @@ Currently, the game settings (minimum, maximum, and number of allowed attempts) 
 
 * You can use `StringTokenizer` to split a `String` in parts. Another option, available for this very case, is `String.split()`, passing `":"` as argument. Beware of `split()`: the input `String` is actually a regular expression. Regular expressions (regex) are a very powerful tool, but we can not cover them in this course: ``StringTokenizer`` is recommended unless you already know regular expressions and how to use them.
 
-## Multiple views
+## Multiple views - DA FARE!
 
 * Modify the architecture in such a way that multiple views are supported at the same time.
 
