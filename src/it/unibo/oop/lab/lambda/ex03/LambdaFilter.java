@@ -7,6 +7,9 @@ import java.awt.GridLayout;
 import java.awt.LayoutManager;
 import java.awt.Toolkit;
 import java.util.function.Function;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -15,9 +18,11 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
 
+import org.junit.jupiter.params.shadow.com.univocity.parsers.annotations.LowerCase;
+
 /**
- * Modify this small program adding new filters.
- * Realize this exercise using as much as possible the Stream library.
+ * Modify this small program adding new filters. Realize this exercise using as
+ * much as possible the Stream library.
  * 
  * 1) Convert to lowercase
  * 
@@ -27,67 +32,78 @@ import javax.swing.JTextArea;
  * 
  * 4) List all the words in alphabetical order
  * 
- * 5) Write the count for each word, e.g. "word word pippo" should output "pippo -> 1 word -> 2"
+ * 5) Write the count for each word, e.g. "word word pippo" should output "pippo
+ * -> 1 word -> 2"
  *
  */
 public final class LambdaFilter extends JFrame {
 
-    private static final long serialVersionUID = 1760990730218643730L;
+	private static final long serialVersionUID = 1760990730218643730L;
 
-    private enum Command {
-        IDENTITY("No modifications", Function.identity());
+	private static final String WORDSREGEX = "\\W+";
 
-        private final String commandName;
-        private final Function<String, String> fun;
+	private enum Command {
+		IDENTITY("No modifications", Function.identity()), LOWERCASE("Convert to lowercase", String::toLowerCase),
+		COUNTCHARS("Count characters", string -> Long.toString(string.chars().count())),
+		COUNTLINES("Count lines", s -> Long.toString(s.lines().count())),
+		LISTWORDS("List all the words in alphabetical order",
+				s -> Stream.of(s.split(WORDSREGEX)).sorted().collect(Collectors.joining(", "))),
+		COUNTWORDS("Count each word",
+				s -> Stream.of(s.split(WORDSREGEX)).sorted()
+						.collect(Collectors.groupingBy(Function.identity(), Collectors.counting())).entrySet().stream()
+						.map(word -> word.getKey() + " -> " + word.getValue()).collect(Collectors.joining(", ")));
 
-        Command(final String name, final Function<String, String> process) {
-            commandName = name;
-            fun = process;
-        }
+		private final String commandName;
+		private final Function<String, String> fun;
 
-        @Override
-        public String toString() {
-            return commandName;
-        }
+		Command(final String name, final Function<String, String> process) {
+			commandName = name;
+			fun = process;
+		}
 
-        public String translate(final String s) {
-            return fun.apply(s);
-        }
-    }
+		@Override
+		public String toString() {
+			return commandName;
+		}
 
-    private LambdaFilter() {
-        super("Lambda filter GUI");
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        final JPanel panel1 = new JPanel();
-        final LayoutManager layout = new BorderLayout();
-        panel1.setLayout(layout);
-        final JComboBox<Command> combo = new JComboBox<>(Command.values());
-        panel1.add(combo, BorderLayout.NORTH);
-        final JPanel centralPanel = new JPanel(new GridLayout(1, 2));
-        final JTextArea left = new JTextArea();
-        left.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-        final JTextArea right = new JTextArea();
-        right.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-        right.setEditable(false);
-        centralPanel.add(left);
-        centralPanel.add(right);
-        panel1.add(centralPanel, BorderLayout.CENTER);
-        final JButton apply = new JButton("Apply");
-        apply.addActionListener(ev -> right.setText(((Command) combo.getSelectedItem()).translate(left.getText())));
-        panel1.add(apply, BorderLayout.SOUTH);
-        setContentPane(panel1);
-        final Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
-        final int sw = (int) screen.getWidth();
-        final int sh = (int) screen.getHeight();
-        setSize(sw / 4, sh / 4);
-        setLocationByPlatform(true);
-    }
+		public String translate(final String s) {
+			return fun.apply(s);
+		}
+	}
 
-    /**
-     * @param a unused
-     */
-    public static void main(final String... a) {
-        final LambdaFilter gui = new LambdaFilter();
-        gui.setVisible(true);
-    }
+	private LambdaFilter() {
+		super("Lambda filter GUI");
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		final JPanel panel1 = new JPanel();
+		final LayoutManager layout = new BorderLayout();
+		panel1.setLayout(layout);
+		final JComboBox<Command> combo = new JComboBox<>(Command.values());
+		panel1.add(combo, BorderLayout.NORTH);
+		final JPanel centralPanel = new JPanel(new GridLayout(1, 2));
+		final JTextArea left = new JTextArea();
+		left.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+		final JTextArea right = new JTextArea();
+		right.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+		right.setEditable(false);
+		centralPanel.add(left);
+		centralPanel.add(right);
+		panel1.add(centralPanel, BorderLayout.CENTER);
+		final JButton apply = new JButton("Apply");
+		apply.addActionListener(ev -> right.setText(((Command) combo.getSelectedItem()).translate(left.getText())));
+		panel1.add(apply, BorderLayout.SOUTH);
+		setContentPane(panel1);
+		final Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
+		final int sw = (int) screen.getWidth();
+		final int sh = (int) screen.getHeight();
+		setSize(sw / 4, sh / 4);
+		setLocationByPlatform(true);
+	}
+
+	/**
+	 * @param a unused
+	 */
+	public static void main(final String... a) {
+		final LambdaFilter gui = new LambdaFilter();
+		gui.setVisible(true);
+	}
 }
